@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Deckbuilder</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+
+		<div id="sidebar">
+			<button id="openFolder">Open Deck Folder</button><br><br>
+			<input type="file" id="fileInput" multiple />
+			<h3>Decks</h3>
+			<button id="newDeck">New Deck</button>						
+			<div id="deckList"></div>
+			<br>
+			<button id="downloadIndex">Download deck-index.json</button>
+		</div>
+
+		<div id="main">
+			<h2 id="deckTitle">No deck selected</h2>
+			<input id="searchInput" placeholder="Search card..." />
+
+			<div id="filters">
+				<div class="filter-container">
+					<div class="filter-title">Elements</div>
+					<div class="filter-group" data-type="elements"></div>
+				</div>
+
+				<div class="filter-container">
+					<div class="filter-title">Classes</div>
+					<div class="filter-group" data-type="classes"></div>
+				</div>
+
+				<div class="filter-container">
+					<div class="filter-title">Types</div>
+					<div class="filter-group" data-type="types"></div>
+				</div>
+
+				<div class="filter-container">
+					<div class="filter-title">Subtypes</div>
+					<div class="filter-group" data-type="subtypes"></div>
+				</div>
+				<input id="filterMemory" placeholder="Memory cost" />
+				<input id="filterReserve" placeholder="Reserve cost" />
+				<input id="filterPower" placeholder="Power" />
+				<input id="filterLife" placeholder="Life/Durability" />
+			</div>
+			<div id="searchResults"></div>
+			<div id="sections"></div>
+			<br>
+			<button id="saveDeck">Save Deck</button>
+		</div>
+		<script src="script.js"></script>
+	</body>
+</html>

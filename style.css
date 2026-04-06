@@ -1,0 +1,161 @@
+body {
+	font-family: sans-serif;
+	display: flex;
+	height: 100vh;
+	margin: 0;
+}
+
+#sidebar {
+	width: 260px;
+	border-right: 1px solid #ccc;
+	overflow: visible;
+	padding: 10px;
+	top: 0;
+	left: 0;
+	z-index: 1;
+}
+
+#main {
+	flex: 1;
+	padding: 10px;
+	overflow: visible;
+}
+
+.deck {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px;
+	cursor: pointer;
+	border-bottom: 1px solid #eee;
+}
+
+.deck-name {
+	flex: 1;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.deck:hover {
+	background: #f0f0f0;
+}
+
+.deck-actions {
+	display: flex;
+	gap: 4px;
+}
+
+.deck-actions button {
+	padding: 2px 6px;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.section {
+	margin-top: 15px;
+}
+
+.section h3 {
+	display: flex;
+	justify-content: space-between;
+}
+
+.zone {
+	min-height: 140px;
+	border: 1px dashed #ccc;
+	padding: 5px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.card-tile {
+	width: 110px;
+	border: 1px solid #ccc;
+	padding: 4px;
+	cursor: pointer;
+	position: relative;
+}
+
+.card-tile img {
+	width: 100%;
+}
+
+.card-tile:hover {
+	background: #eee;
+	z-index: 20;
+	transform: scale(3);
+	box-shadow: 20px 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.card-count {
+	position: absolute;
+	top: 2px;
+	left: 4px;
+	background: #000;
+	color: #fff;
+	font-size: 12px;
+	padding: 2px 4px;
+}
+
+.card-controls {
+	position: absolute;
+	bottom: 2px;
+	right: 2px;
+}
+
+.card-controls button {
+	margin-left: 2px;
+}
+
+#searchResults {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+#filters {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 6px;
+	margin-top: 10px;
+}
+
+#filters input {
+	width: 99%;
+}
+.filter-group {
+    flex-wrap: wrap;      /* allow multiple lines */
+    gap: 4px 4px;             /* space between chips */
+    align-items: flex-start; /* prevents stretching */
+	justify-content: flex-start; /* align chips to left */
+}
+.chip {
+    display: inline-block;
+    padding: 8px 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #aaa;
+    white-space: nowrap; /* prevent chip text from breaking */
+    flex: 0 0 auto;       /* do not grow or shrink, keep natural width */
+	margin-right: 8px;
+	margin-bottom: 8px;
+}
+.chip.active {
+    background: #555;
+	color: white;
+}
+.filter-group.scrollable {
+    max-height: 100px;
+    overflow-y: auto;    /* scroll vertically if needed */
+}
+.filter-container {
+    margin-bottom: 8px; /* space between groups */
+}
+
+.filter-title {
+    font-weight: bold;
+    margin-bottom: 2px;  /* small gap above chips */
+    font-size: 0.9em;
+}
