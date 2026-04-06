@@ -178,9 +178,7 @@ function serializeDeck(p) {
     const f = (title, cards) => {
         const valid = clean(cards);
         if (!valid.length) return "";
-        return `# ${title}\n + valid.map(c => ${c.count} ${c.name}).join("\n") + "\n\n"; };
-	).join("\n") +
-      "\n\n"`;
+        return `# ${title}\n` + valid.map(c => `${c.count} ${c.name}`).join("\n") + "\n\n";
     };
 
     return (
