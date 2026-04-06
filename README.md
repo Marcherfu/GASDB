@@ -10,8 +10,8 @@ It is still very early in it's devlopment and young but already quite efficient 
 
 ## How it Works
 To make it work, you need, based on your browser :
- - To upload your whole Deck Library folder, found in "\AppData\LocalLow\Weebs of the Shore\Grand Archive Sandbox\DeckLibrary" ;
- - To point to your Deck Library folder.
+ - To upload your whole Deck Library folder, found in "\AppData\LocalLow\Weebs of the Shore\Grand Archive Sandbox\DeckLibrary" (using the Browse button) ;
+ - To point to your Deck Library folder (using Open Deck Folder, same folder as before).
 
 Afterwards, it will show you the full list of your decks and you will be able to edit them accordingly to your taste.
 
