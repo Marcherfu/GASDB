@@ -89774,7 +89774,7 @@
       "type": "memory",
       "value": "3"
     },
-    "power": null,
+    "power": 3,
     "life": 25,
     "durability": null,
     "subtypes": [

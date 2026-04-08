@@ -2,14 +2,19 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<title>Deckbuilder</title>
+		<title>GAS DB</title>
+		<link rel="icon" href="ga-sandbox-favicon.png" type="image/png">
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 
 		<div id="sidebar">
-			<button id="openFolder">Open Deck Folder</button><br><br>
-			<input type="file" id="fileInput" multiple />
+			<button id="toggleDark">🌙</button> GA Sandbox DeckBuilder
+			<br> By BeerMoney/Marcherfu
+			<br><br>
+			<button id="openFolder">Open Deck Folder</button>
+			<input type="file" id="fileInput" name="fileupload" style="display: none" onChange="Handlechange();" multiple/>
+			<input type="button" value="Upload deck files" id="fakeBrowse" onclick="HandleBrowseClick();"/>
 			<h3>Decks</h3>
 			<button id="newDeck">New Deck</button>						
 			<div id="deckList"></div>
@@ -38,13 +43,18 @@
 				</div>
 
 				<div class="filter-container">
-					<div class="filter-title">Subtypes</div>
-					<div class="filter-group" data-type="subtypes"></div>
+					<div class="filter-title">Subtypes
+						<input type="text" id="subtypeSearch" placeholder="Search subtypes…">
+					</div>
+					<div class="filter-group" id="subtypeChips" data-type="subtypes"></div>
 				</div>
-				<input id="filterMemory" placeholder="Memory cost" />
-				<input id="filterReserve" placeholder="Reserve cost" />
-				<input id="filterPower" placeholder="Power" />
-				<input id="filterLife" placeholder="Life/Durability" />
+
+				<div class="stats-container">
+					<input type="number" min="0" id="filterMemory" placeholder="Memory cost" />
+					<input type="number" min="0" id="filterReserve" placeholder="Reserve cost" />
+					<input type="number" min="0" id="filterPower" placeholder="Power" />
+					<input type="number" min="0" id="filterLife" placeholder="Life/Durability" />
+				</div>
 			</div>
 			<div id="searchResults"></div>
 			<div id="sections"></div>

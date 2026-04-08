@@ -11,27 +11,83 @@ let activeFilters = {
   subtypes: new Set()
 };
 document.querySelector('.filter-group[data-type="subtypes"]').classList.add('scrollable');
+const toggleDark = document.getElementById("toggleDark");
+toggleDark.onclick = () => {
+	document.body.classList.toggle("dark");
+	localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+	updateDarkButton();
+};
+function updateDarkButton(){
+	toggleDark.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+}
+const subtypeInput = document.getElementById("subtypeSearch");
+subtypeInput.addEventListener("input", () => {
+    const query = subtypeInput.value.toLowerCase();
+
+    Array.from(subtypeChips.children).forEach(chip => {
+        if (chip.textContent.toLowerCase().includes(query)) {
+            chip.style.display = "inline-block";
+        } else {
+            chip.style.display = "none";
+        }
+    });
+});
+function HandleBrowseClick() {
+	var fileinput = document.getElementById("fileInput");
+	fileinput.click();
+}
+function Handlechange() {
+	var fileinput = document.getElementById("fileInput");
+	var textinput = document.getElementById("filename");
+	textinput.value = fileinput.value;
+}
+function setDeckTitle(deckName) {
+    if (deckName) {
+        document.title = `${deckName} - GAS DB`;
+    } else {
+        document.title = "GAS DB";
+    }
+}
+let shiftHeld = false;
+document.addEventListener("keydown", (e) => {
+	if (e.key === "Shift") {
+		shiftHeld = true;
+		document.querySelectorAll(".card-tile:hover")
+			.forEach(el => el.classList.add("zoom"));
+	}
+});
+document.addEventListener("keyup", (e) => {
+	if (e.key === "Shift") {
+		shiftHeld = false;
+		removeAllZooms();
+	}
+});
+function removeAllZooms(){
+	document.querySelectorAll(".card-tile.zoom")
+		.forEach(el => el.classList.remove("zoom"));
+}
+
 function buildFilterChips(){
-  const groups = {
-    elements: new Set(),
-    classes: new Set(),
-    types: new Set(),
-    subtypes: new Set()
-  };
+	const groups = {
+		elements: new Set(),
+		classes: new Set(),
+		types: new Set(),
+		subtypes: new Set()
+	};
 
-  cards.forEach(c=>{
-    c.elements.forEach(x=>groups.elements.add(x));
-    c.classes.forEach(x=>groups.classes.add(x));
-    c.types.forEach(x=>groups.types.add(x));
-    c.subtypes.forEach(x=>groups.subtypes.add(x));
-  });
+	cards.forEach(c=>{
+		c.elements.forEach(x=>groups.elements.add(x));
+		c.classes.forEach(x=>groups.classes.add(x));
+		c.types.forEach(x=>groups.types.add(x));
+		c.subtypes.forEach(x=>groups.subtypes.add(x));
+	});
 
-  Object.keys(groups).forEach(type=>{
-    const container = document.querySelector(`.filter-group[data-type="${type}"]`);
-    container.innerHTML="";
+	Object.keys(groups).forEach(type=>{
+		const container = document.querySelector(`.filter-group[data-type="${type}"]`);
+		container.innerHTML="";
 
 	Array.from(groups[type])
-		.sort((a,b) => a.localeCompare(b))  // alphabetically
+		.sort((a,b) => a.localeCompare(b))
 		.forEach(value => {
 		const chip = document.createElement("div");
 		chip.className = "chip";
@@ -49,16 +105,19 @@ function buildFilterChips(){
 			searchCards();
 		};
 		container.appendChild(chip);
+		});
 	});
-  });
 }
 function norm(c) {
-	let memory = 0, reserve = 0;
+	let memory = null, reserve = null;
 
 	if (c.cost?.type && c.cost?.value != null) {
-		const val = Number(c.cost.value) || 0;
-		if (c.cost.type.toLowerCase() === "memory") memory = val;
-		else if (c.cost.type.toLowerCase() === "reserve") reserve = val;
+		const val = Number(c.cost.value);
+		if (c.cost.type.toLowerCase() === "memory") {
+			memory = val;
+		} else if (c.cost.type.toLowerCase() === "reserve") {
+			reserve = val;
+		}
 	}
 
     return {
@@ -71,8 +130,8 @@ function norm(c) {
         subtypes: c.subtypes || [],
         memory,
         reserve,
-        power: c.power || 0,
-        life: c.life || c.durability || 0
+		power: c.power ?? null,
+		life: (c.life ?? c.durability) ?? null
     };
 }
 
@@ -90,18 +149,14 @@ function matchArrayFilter(values, filter) {
 
 function searchCards() {
     const q = searchInput.value.toLowerCase();
-/*    const fElements = filterElements.value.toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
-    const fClasses = filterClasses.value.toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
-    const fTypes = filterTypes.value.toLowerCase().split(",").map(s => s.trim()).filter(Boolean);
-    const fSubtypes = filterSubtypes.value.toLowerCase().split(",").map(s => s.trim()).filter(Boolean);*/
 	const fElements = [...activeFilters.elements].map(x => x.toLowerCase());
 	const fClasses  = [...activeFilters.classes].map(x => x.toLowerCase());
 	const fTypes    = [...activeFilters.types].map(x => x.toLowerCase());
 	const fSubtypes = [...activeFilters.subtypes].map(x => x.toLowerCase());
-    const fMemory = +filterMemory.value || null;
-    const fReserve = +filterReserve.value || null;
-    const fPower = +filterPower.value || null;
-    const fLife = +filterLife.value || null;
+	const fMemory = filterMemory.value === "" ? null : Number(filterMemory.value);
+	const fReserve = filterReserve.value === "" ? null : Number(filterReserve.value);
+	const fPower = filterPower.value === "" ? null : Number(filterPower.value);
+	const fLife  = filterLife.value  === "" ? null : Number(filterLife.value);
     const res = document.getElementById("searchResults");
     res.innerHTML = "";
     const noFilters = !q &&
@@ -126,9 +181,9 @@ function searchCards() {
         if (!matchArrayFilter(c.subtypes.map(x => x.toLowerCase()), fSubtypes)) return false;
         if (fMemory !== null && c.memory != fMemory) return false;
         if (fReserve !== null && c.reserve != fReserve) return false;
-        if (fPower !== null && c.power != fPower) return false;
-        if (fLife !== null && c.life != fLife) return false;
-        return true;
+		if (fPower !== null && c.power !== fPower) return false;
+		if (fLife !== null && c.life !== fLife) return false;
+		return true;
     }).slice(0, 60);
 
     results.forEach(card => {
@@ -137,8 +192,15 @@ function searchCards() {
         d.draggable = true;
         d.ondragstart = (e) => {
             e.dataTransfer.setData("text/plain", card.name);
-        };
-
+        };//test
+		d.addEventListener("mouseenter", () => {
+			if (shiftHeld) {
+				d.classList.add("zoom");
+			}
+		});
+		d.addEventListener("mouseleave", () => {
+			d.classList.remove("zoom");
+		});//test
         d.innerHTML = `<img src="http://api.gatcg.com/` + `${card.image}"/>`;
         d.onclick = () => addCard(card.name);
         res.appendChild(d);
@@ -201,6 +263,7 @@ function renderDeckList() {
             currentDeck = d;
             deckTitle.textContent = d.name;
             renderSections();
+			setDeckTitle(d.name);
         };
 
         const btnWrap = document.createElement("div");
@@ -228,6 +291,7 @@ function renderDeckList() {
                 if (currentDeck?.id === d.id) {
                     currentDeck = null;
                     deckTitle.textContent = "No deck selected";
+					setDeckTitle(null);
                     document.getElementById("sections").innerHTML = "";
                 }
                 renderDeckList();
@@ -281,7 +345,12 @@ function createZone(name, list) {
             e.dataTransfer.setData("text/plain", card.name);
             e.dataTransfer.setData("fromZone", name.toLowerCase());
         };
-
+		tile.addEventListener("mouseenter", () => {
+			if (shiftHeld) tile.classList.add("zoom");
+		});
+		tile.addEventListener("mouseleave", () => {
+			tile.classList.remove("zoom");
+		});
         const img = document.createElement("img");
         img.src = "http://api.gatcg.com/" + data.image;
         const nameDiv = document.createElement("div");
@@ -398,17 +467,13 @@ async function saveDeckFile() {
 }
 
 searchInput.oninput = searchCards;
-/*filterElements.oninput = searchCards;
-filterClasses.oninput = searchCards;
-filterTypes.oninput = searchCards;
-filterSubtypes.oninput = searchCards;*/
 filterMemory.oninput = searchCards;
 filterReserve.oninput = searchCards;
 filterPower.oninput = searchCards;
 filterLife.oninput = searchCards;
 
 openFolder.onclick = async () => {
-    if (!window.showDirectoryPicker) return alert("Use import");
+    if (!window.showDirectoryPicker) return alert("Your browser is not compatible.\nUse the 'Upload deck files' button instead.");
     fileMode = false;
     dirHandle = await window.showDirectoryPicker();
     await loadDecksFromFolder();
@@ -489,6 +554,10 @@ async function loadDecksFromFiles(fl) {
 async function init() {
     await loadCardDatabase();
     buildFilterChips();
+	updateDarkButton();
 }
 
 init();
+if(localStorage.getItem("darkMode") === "true"){
+	document.body.classList.add("dark");
+}

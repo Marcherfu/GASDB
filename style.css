@@ -1,13 +1,35 @@
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --border: #cccccc;
+  --card-bg: #ffffff;
+  --hover: #f0f0f0;
+  --chip-bg: #aaaaaa;
+  --chip-active: #555555;
+}
+
 body {
 	font-family: sans-serif;
 	display: flex;
 	height: 100vh;
 	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+}
+
+body.dark {
+  --bg: #1e1e1e;
+  --text: #eaeaea;
+  --border: #444;
+  --card-bg: #2a2a2a;
+  --hover: #333;
+  --chip-bg: #444;
+  --chip-active: #888;
 }
 
 #sidebar {
 	width: 260px;
-	border-right: 1px solid #ccc;
+	border-right: 1px solid var(--border);
 	overflow: visible;
 	padding: 10px;
 	top: 0;
@@ -38,7 +60,7 @@ body {
 }
 
 .deck:hover {
-	background: #f0f0f0;
+  background: var(--hover);
 }
 
 .deck-actions {
@@ -63,7 +85,7 @@ body {
 
 .zone {
 	min-height: 140px;
-	border: 1px dashed #ccc;
+	border: 1px dashed var(--border);
 	padding: 5px;
 	display: flex;
 	flex-wrap: wrap;
@@ -72,7 +94,8 @@ body {
 
 .card-tile {
 	width: 110px;
-	border: 1px solid #ccc;
+	border: 1px solid var(--border);
+	background: var(--card-bg);
 	padding: 4px;
 	cursor: pointer;
 	position: relative;
@@ -80,15 +103,16 @@ body {
 
 .card-tile img {
 	width: 100%;
+	position: relative;
+	transition: transform 0.15s ease;
+	transform-origin: center center;
 }
 
-.card-tile:hover {
-	background: #eee;
-	z-index: 20;
-	transform: scale(3);
-	box-shadow: 20px 4px 12px rgba(0, 0, 0, 0.4);
+.card-tile.zoom img {
+  transform: scale(3);
+  z-index: 10;
+  position: relative;
 }
-
 .card-count {
 	position: absolute;
 	top: 2px;
@@ -97,12 +121,14 @@ body {
 	color: #fff;
 	font-size: 12px;
 	padding: 2px 4px;
+	z-index: 2;
 }
 
 .card-controls {
 	position: absolute;
 	bottom: 2px;
 	right: 2px;
+	z-index: 2;
 }
 
 .card-controls button {
@@ -117,45 +143,52 @@ body {
 
 #filters {
 	display: grid;
-	grid-template-columns: repeat(2, 1fr);
 	gap: 6px;
 	margin-top: 10px;
 }
-
-#filters input {
-	width: 99%;
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+.stats-container input {
+    width: 99%;
+    box-sizing: border-box;
+    padding: 2px 4px;
+    font-size: 0.9em;
 }
 .filter-group {
-    flex-wrap: wrap;      /* allow multiple lines */
-    gap: 4px 4px;             /* space between chips */
-    align-items: flex-start; /* prevents stretching */
-	justify-content: flex-start; /* align chips to left */
+    flex-wrap: wrap;
+    gap: 4px 4px;
+    align-items: flex-start;
+	justify-content: flex-start;
 }
 .chip {
     display: inline-block;
     padding: 8px 8px;
     border-radius: 12px;
     cursor: pointer;
-    background: #aaa;
-    white-space: nowrap; /* prevent chip text from breaking */
-    flex: 0 0 auto;       /* do not grow or shrink, keep natural width */
+	background: var(--chip-bg);
+    white-space: nowrap;
+    flex: 0 0 auto;
 	margin-right: 8px;
 	margin-bottom: 8px;
 }
 .chip.active {
-    background: #555;
-	color: white;
+	background: var(--chip-active);
+	color: #fff;
 }
 .filter-group.scrollable {
     max-height: 100px;
-    overflow-y: auto;    /* scroll vertically if needed */
+    overflow-y: auto;
 }
 .filter-container {
-    margin-bottom: 8px; /* space between groups */
+    margin-bottom: 8px;
 }
 
 .filter-title {
     font-weight: bold;
-    margin-bottom: 2px;  /* small gap above chips */
-    font-size: 0.9em;
+    margin-bottom: 2px;
+    font-size: 1.2em;
+	height: 1.8em;
 }
