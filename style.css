@@ -1,11 +1,67 @@
 :root {
-  --bg: #ffffff;
-  --text: #000000;
-  --border: #cccccc;
-  --card-bg: #ffffff;
-  --hover: #f0f0f0;
-  --chip-bg: #aaaaaa;
-  --chip-active: #555555;
+	--bg: #ffffff;
+	--text: #000000;
+	--border: #cccccc;
+	--card-bg: #ffffff;
+	--hover: #f0f0f0;
+	--chip-bg: #aaaaaa;
+	--chip-active: #555555;
+	--segment-bg: #aaaaaa;
+	--segment-active: #cccccc;
+	--segment-track: #555555;
+}
+
+body.dark {
+	--bg: #1e1e1e;
+	--text: #eaeaea;
+	--border: #444444;
+	--card-bg: #2a2a2a;
+	--hover: #333333;
+	--chip-bg: #444444;
+	--chip-active: #888888;
+	--segment-bg: #444444;
+	--segment-active: #2a2a2a;
+	--segment-track: #888888;
+}
+
+.segmented {
+	display: flex;
+	position: relative;
+	background: var(--segment-bg);
+	border-radius: 999px;
+	padding: 4px;
+	width: 320px;
+}
+
+.segmented button {
+	flex: 1;
+	text-align: center;
+	position: relative;
+	z-index: 2;
+	border: none;
+	background: transparent;
+	color: var(--text);
+	padding: 6px 12px;
+	margin: 0;
+	border-radius: 999px;
+	cursor: pointer;
+	font-size: 0.9rem;
+}
+
+.segmented button.active {
+	font-weight: 500;
+	color: #fff;
+}
+
+.segmented-track {
+	position: absolute;
+	top: 4px;
+	left: 0;
+	height: calc(100% - 8px);
+	background: var(--segment-track);
+	border-radius: 999px;
+	transition: transform 0.25s ease, width 0.25s ease;
+	z-index: 1;
 }
 
 body {
@@ -17,15 +73,6 @@ body {
 	color: var(--text);
 }
 
-body.dark {
-  --bg: #1e1e1e;
-  --text: #eaeaea;
-  --border: #444;
-  --card-bg: #2a2a2a;
-  --hover: #333;
-  --chip-bg: #444;
-  --chip-active: #888;
-}
 
 #sidebar {
 	width: 260px;
@@ -60,7 +107,7 @@ body.dark {
 }
 
 .deck:hover {
-  background: var(--hover);
+	background: var(--hover);
 }
 
 .deck-actions {
@@ -109,10 +156,11 @@ body.dark {
 }
 
 .card-tile.zoom img {
-  transform: scale(3);
-  z-index: 10;
-  position: relative;
+	transform: scale(3);
+	z-index: 10;
+	position: relative;
 }
+
 .card-count {
 	position: absolute;
 	top: 2px;
@@ -146,49 +194,56 @@ body.dark {
 	gap: 6px;
 	margin-top: 10px;
 }
+
 .stats-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 4px;
 }
+
 .stats-container input {
-    width: 99%;
-    box-sizing: border-box;
-    padding: 2px 4px;
-    font-size: 0.9em;
+	width: 99%;
+	box-sizing: border-box;
+	padding: 2px 4px;
+	font-size: 0.9em;
 }
+
 .filter-group {
-    flex-wrap: wrap;
-    gap: 4px 4px;
-    align-items: flex-start;
+	flex-wrap: wrap;
+	gap: 4px 4px;
+	align-items: flex-start;
 	justify-content: flex-start;
 }
+
 .chip {
-    display: inline-block;
-    padding: 8px 8px;
-    border-radius: 12px;
-    cursor: pointer;
+	display: inline-block;
+	padding: 8px 8px;
+	border-radius: 12px;
+	cursor: pointer;
 	background: var(--chip-bg);
-    white-space: nowrap;
-    flex: 0 0 auto;
+	white-space: nowrap;
+	flex: 0 0 auto;
 	margin-right: 8px;
 	margin-bottom: 8px;
 }
+
 .chip.active {
 	background: var(--chip-active);
 	color: #fff;
 }
+
 .filter-group.scrollable {
-    max-height: 100px;
-    overflow-y: auto;
+	max-height: 100px;
+	overflow-y: auto;
 }
+
 .filter-container {
-    margin-bottom: 8px;
+	margin-bottom: 8px;
 }
 
 .filter-title {
-    font-weight: bold;
-    margin-bottom: 2px;
-    font-size: 1.2em;
+	font-weight: bold;
+	margin-bottom: 2px;
+	font-size: 1.2em;
 	height: 1.8em;
 }

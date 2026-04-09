@@ -5,20 +5,21 @@ let dirHandle = null,
     uploadedFiles = {};
 let cards = [];
 let activeFilters = {
-  elements: new Set(),
-  classes: new Set(),
-  types: new Set(),
-  subtypes: new Set()
+    elements: new Set(),
+    classes: new Set(),
+    types: new Set(),
+    subtypes: new Set()
 };
 document.querySelector('.filter-group[data-type="subtypes"]').classList.add('scrollable');
 const toggleDark = document.getElementById("toggleDark");
 toggleDark.onclick = () => {
-	document.body.classList.toggle("dark");
-	localStorage.setItem("darkMode", document.body.classList.contains("dark"));
-	updateDarkButton();
+    document.body.classList.toggle("dark");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+    updateDarkButton();
 };
-function updateDarkButton(){
-	toggleDark.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+
+function updateDarkButton() {
+    toggleDark.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
 }
 const subtypeInput = document.getElementById("subtypeSearch");
 subtypeInput.addEventListener("input", () => {
@@ -32,15 +33,18 @@ subtypeInput.addEventListener("input", () => {
         }
     });
 });
+
 function HandleBrowseClick() {
-	var fileinput = document.getElementById("fileInput");
-	fileinput.click();
+    var fileinput = document.getElementById("fileInput");
+    fileinput.click();
 }
+
 function Handlechange() {
-	var fileinput = document.getElementById("fileInput");
-	var textinput = document.getElementById("filename");
-	textinput.value = fileinput.value;
+    var fileinput = document.getElementById("fileInput");
+    var textinput = document.getElementById("filename");
+    textinput.value = fileinput.value;
 }
+
 function setDeckTitle(deckName) {
     if (deckName) {
         document.title = `${deckName} - GAS DB`;
@@ -48,77 +52,114 @@ function setDeckTitle(deckName) {
         document.title = "GAS DB";
     }
 }
+const slider = document.getElementById("formatSlider");
+const track = slider.querySelector(".segmented-track");
+const buttons = slider.querySelectorAll("button");
+
+let formatFilter = "ANYWHERE";
+
+function updateSlider(activeBtn) {
+    track.style.width = activeBtn.offsetWidth + "px";
+    track.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+}
+buttons.forEach(btn => {
+    btn.onclick = () => {
+        formatFilter = btn.dataset.format;
+        buttons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        updateSlider(btn);
+        searchCards();
+    };
+});
+window.addEventListener("load", () => {
+    const active = slider.querySelector(".active");
+    if (active) updateSlider(active);
+});
+
+function isLegalIn(card, format) {
+    if (!card.legality) return true;
+
+    const f = card.legality[format];
+    if (!f) return true;
+
+    return f.limit !== 0;
+}
+
+
 let shiftHeld = false;
 document.addEventListener("keydown", (e) => {
-	if (e.key === "Shift") {
-		shiftHeld = true;
-		document.querySelectorAll(".card-tile:hover")
-			.forEach(el => el.classList.add("zoom"));
-	}
+    if (e.key === "Shift") {
+        shiftHeld = true;
+        document.querySelectorAll(".card-tile:hover")
+            .forEach(el => el.classList.add("zoom"));
+    }
 });
 document.addEventListener("keyup", (e) => {
-	if (e.key === "Shift") {
-		shiftHeld = false;
-		removeAllZooms();
-	}
+    if (e.key === "Shift") {
+        shiftHeld = false;
+        removeAllZooms();
+    }
 });
-function removeAllZooms(){
-	document.querySelectorAll(".card-tile.zoom")
-		.forEach(el => el.classList.remove("zoom"));
+
+function removeAllZooms() {
+    document.querySelectorAll(".card-tile.zoom")
+        .forEach(el => el.classList.remove("zoom"));
 }
 
-function buildFilterChips(){
-	const groups = {
-		elements: new Set(),
-		classes: new Set(),
-		types: new Set(),
-		subtypes: new Set()
-	};
+function buildFilterChips() {
+    const groups = {
+        elements: new Set(),
+        classes: new Set(),
+        types: new Set(),
+        subtypes: new Set()
+    };
 
-	cards.forEach(c=>{
-		c.elements.forEach(x=>groups.elements.add(x));
-		c.classes.forEach(x=>groups.classes.add(x));
-		c.types.forEach(x=>groups.types.add(x));
-		c.subtypes.forEach(x=>groups.subtypes.add(x));
-	});
+    cards.forEach(c => {
+        c.elements.forEach(x => groups.elements.add(x));
+        c.classes.forEach(x => groups.classes.add(x));
+        c.types.forEach(x => groups.types.add(x));
+        c.subtypes.forEach(x => groups.subtypes.add(x));
+    });
 
-	Object.keys(groups).forEach(type=>{
-		const container = document.querySelector(`.filter-group[data-type="${type}"]`);
-		container.innerHTML="";
+    Object.keys(groups).forEach(type => {
+        const container = document.querySelector(`.filter-group[data-type="${type}"]`);
+        container.innerHTML = "";
 
-	Array.from(groups[type])
-		.sort((a,b) => a.localeCompare(b))
-		.forEach(value => {
-		const chip = document.createElement("div");
-		chip.className = "chip";
-		chip.textContent = value;
+        Array.from(groups[type])
+            .sort((a, b) => a.localeCompare(b))
+            .forEach(value => {
+                const chip = document.createElement("div");
+                chip.className = "chip";
+                chip.textContent = value;
 
-		chip.onclick = () => {
-			const val = value.toLowerCase();
-			if(activeFilters[type].has(val)){
-				activeFilters[type].delete(val);
-				chip.classList.remove("active");
-			} else {
-				activeFilters[type].add(val);
-				chip.classList.add("active");
-			}
-			searchCards();
-		};
-		container.appendChild(chip);
-		});
-	});
+                chip.onclick = () => {
+                    const val = value.toLowerCase();
+                    if (activeFilters[type].has(val)) {
+                        activeFilters[type].delete(val);
+                        chip.classList.remove("active");
+                    } else {
+                        activeFilters[type].add(val);
+                        chip.classList.add("active");
+                    }
+                    searchCards();
+                };
+                container.appendChild(chip);
+            });
+    });
 }
+
 function norm(c) {
-	let memory = null, reserve = null;
+    let memory = null,
+        reserve = null;
 
-	if (c.cost?.type && c.cost?.value != null) {
-		const val = Number(c.cost.value);
-		if (c.cost.type.toLowerCase() === "memory") {
-			memory = val;
-		} else if (c.cost.type.toLowerCase() === "reserve") {
-			reserve = val;
-		}
-	}
+    if (c.cost?.type && c.cost?.value != null) {
+        const val = Number(c.cost.value);
+        if (c.cost.type.toLowerCase() === "memory") {
+            memory = val;
+        } else if (c.cost.type.toLowerCase() === "reserve") {
+            reserve = val;
+        }
+    }
 
     return {
         name: c.name || c.cardName,
@@ -130,8 +171,9 @@ function norm(c) {
         subtypes: c.subtypes || [],
         memory,
         reserve,
-		power: c.power ?? null,
-		life: (c.life ?? c.durability) ?? null
+        power: c.power ?? null,
+        life: (c.life ?? c.durability) ?? null,
+        legality: c.legality || null
     };
 }
 
@@ -149,14 +191,14 @@ function matchArrayFilter(values, filter) {
 
 function searchCards() {
     const q = searchInput.value.toLowerCase();
-	const fElements = [...activeFilters.elements].map(x => x.toLowerCase());
-	const fClasses  = [...activeFilters.classes].map(x => x.toLowerCase());
-	const fTypes    = [...activeFilters.types].map(x => x.toLowerCase());
-	const fSubtypes = [...activeFilters.subtypes].map(x => x.toLowerCase());
-	const fMemory = filterMemory.value === "" ? null : Number(filterMemory.value);
-	const fReserve = filterReserve.value === "" ? null : Number(filterReserve.value);
-	const fPower = filterPower.value === "" ? null : Number(filterPower.value);
-	const fLife  = filterLife.value  === "" ? null : Number(filterLife.value);
+    const fElements = [...activeFilters.elements].map(x => x.toLowerCase());
+    const fClasses = [...activeFilters.classes].map(x => x.toLowerCase());
+    const fTypes = [...activeFilters.types].map(x => x.toLowerCase());
+    const fSubtypes = [...activeFilters.subtypes].map(x => x.toLowerCase());
+    const fMemory = filterMemory.value === "" ? null : Number(filterMemory.value);
+    const fReserve = filterReserve.value === "" ? null : Number(filterReserve.value);
+    const fPower = filterPower.value === "" ? null : Number(filterPower.value);
+    const fLife = filterLife.value === "" ? null : Number(filterLife.value);
     const res = document.getElementById("searchResults");
     res.innerHTML = "";
     const noFilters = !q &&
@@ -181,9 +223,21 @@ function searchCards() {
         if (!matchArrayFilter(c.subtypes.map(x => x.toLowerCase()), fSubtypes)) return false;
         if (fMemory !== null && c.memory != fMemory) return false;
         if (fReserve !== null && c.reserve != fReserve) return false;
-		if (fPower !== null && c.power !== fPower) return false;
-		if (fLife !== null && c.life !== fLife) return false;
-		return true;
+        if (fPower !== null && c.power !== fPower) return false;
+        if (fLife !== null && c.life !== fLife) return false;
+        if (formatFilter !== "ANYWHERE") {
+            if (!isLegalIn(c, formatFilter)) return false;
+        }
+        if (formatFilter === "ANYWHERE") {
+            const legalAnywhere =
+                isLegalIn(c, "STANDARD") ||
+                isLegalIn(c, "PANTHEON") ||
+                isLegalIn(c, "DRAFT");
+            if (!legalAnywhere) return false;
+        } else {
+            if (!isLegalIn(c, formatFilter)) return false;
+        }
+        return true;
     }).slice(0, 60);
 
     results.forEach(card => {
@@ -192,15 +246,15 @@ function searchCards() {
         d.draggable = true;
         d.ondragstart = (e) => {
             e.dataTransfer.setData("text/plain", card.name);
-        };//test
-		d.addEventListener("mouseenter", () => {
-			if (shiftHeld) {
-				d.classList.add("zoom");
-			}
-		});
-		d.addEventListener("mouseleave", () => {
-			d.classList.remove("zoom");
-		});//test
+        };
+        d.addEventListener("mouseenter", () => {
+            if (shiftHeld) {
+                d.classList.add("zoom");
+            }
+        });
+        d.addEventListener("mouseleave", () => {
+            d.classList.remove("zoom");
+        });
         d.innerHTML = `<img src="http://api.gatcg.com/` + `${card.image}"/>`;
         d.onclick = () => addCard(card.name);
         res.appendChild(d);
@@ -263,7 +317,7 @@ function renderDeckList() {
             currentDeck = d;
             deckTitle.textContent = d.name;
             renderSections();
-			setDeckTitle(d.name);
+            setDeckTitle(d.name);
         };
 
         const btnWrap = document.createElement("div");
@@ -291,7 +345,7 @@ function renderDeckList() {
                 if (currentDeck?.id === d.id) {
                     currentDeck = null;
                     deckTitle.textContent = "No deck selected";
-					setDeckTitle(null);
+                    setDeckTitle(null);
                     document.getElementById("sections").innerHTML = "";
                 }
                 renderDeckList();
@@ -345,12 +399,12 @@ function createZone(name, list) {
             e.dataTransfer.setData("text/plain", card.name);
             e.dataTransfer.setData("fromZone", name.toLowerCase());
         };
-		tile.addEventListener("mouseenter", () => {
-			if (shiftHeld) tile.classList.add("zoom");
-		});
-		tile.addEventListener("mouseleave", () => {
-			tile.classList.remove("zoom");
-		});
+        tile.addEventListener("mouseenter", () => {
+            if (shiftHeld) tile.classList.add("zoom");
+        });
+        tile.addEventListener("mouseleave", () => {
+            tile.classList.remove("zoom");
+        });
         const img = document.createElement("img");
         img.src = "http://api.gatcg.com/" + data.image;
         const nameDiv = document.createElement("div");
@@ -554,10 +608,10 @@ async function loadDecksFromFiles(fl) {
 async function init() {
     await loadCardDatabase();
     buildFilterChips();
-	updateDarkButton();
+    updateDarkButton();
 }
 
 init();
-if(localStorage.getItem("darkMode") === "true"){
-	document.body.classList.add("dark");
+if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark");
 }
