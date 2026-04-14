@@ -6,7 +6,8 @@ It is still very early in it's devlopment and young but already quite efficient 
  - Import/Export, Read and Work with the whole DeckLibrary folder from Sandbox, including the deck-index.json file ;
  - Supports the full Grand Archive TCG database, fetched from the API with a python script ;
  - Moving to Main / Material / Sideboard ;
- - Complete search engine.
+ - Complete search engine ;
+ - Show correct Editions but doesn't support editing them as of April 14th.
 
 ## How it Works
 To make it work, you need, based on your browser :
