@@ -208,6 +208,18 @@ body {
 	font-size: 0.9em;
 }
 
+#textInputs {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 4px;
+}
+#textInputs input {
+	width: 99%;
+	box-sizing: border-box;
+	padding: 2px 4px;
+	font-size: 0.9em;
+}
+
 .filter-group {
 	flex-wrap: wrap;
 	gap: 4px 4px;

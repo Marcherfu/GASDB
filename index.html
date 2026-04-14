@@ -1,65 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>GAS DB</title>
-    <link rel="icon" href="ga-sandbox-favicon.png" type="image/png">
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body>
-    <div id="sidebar">
-      <button id="toggleDark">🌙</button> GA Sandbox DeckBuilder <br> By BeerMoney/Marcherfu <br>
-      <br>
-      <button id="openFolder">Open Deck Folder</button>
-      <input type="file" id="fileInput" name="fileupload" style="display: none" onChange="Handlechange();" multiple />
-      <input type="button" value="Upload deck files" id="fakeBrowse" onclick="HandleBrowseClick();" />
-      <h3>Decks</h3>
-      <button id="newDeck">New Deck</button>
-      <div id="deckList"></div>
-      <br>
-      <button id="downloadIndex">Download deck-index.json</button>
-    </div>
-    <div id="main">
-      <h2 id="deckTitle">No deck selected</h2>
-      <div id="formatSlider" class="segmented">
-        <div class="segmented-track"></div>
-        <button data-format="ANYWHERE" class="active">Any Format</button>
-        <button data-format="STANDARD">Standard</button>
-        <button data-format="PANTHEON">Pantheon</button>
-        <button data-format="DRAFT">Draft</button>
-      </div>
-      <br>
-      <input id="searchInput" placeholder="Search card..." />
-      <div id="filters">
-        <div class="filter-container">
-          <div class="filter-title">Elements</div>
-          <div class="filter-group" data-type="elements"></div>
-        </div>
-        <div class="filter-container">
-          <div class="filter-title">Classes</div>
-          <div class="filter-group" data-type="classes"></div>
-        </div>
-        <div class="filter-container">
-          <div class="filter-title">Types</div>
-          <div class="filter-group" data-type="types"></div>
-        </div>
-        <div class="filter-container">
-          <div class="filter-title">Subtypes <input type="text" id="subtypeSearch" placeholder="Search subtypes…">
-          </div>
-          <div class="filter-group" id="subtypeChips" data-type="subtypes"></div>
-        </div>
-        <div class="stats-container">
-          <input type="number" min="0" id="filterMemory" placeholder="Memory cost" />
-          <input type="number" min="0" id="filterReserve" placeholder="Reserve cost" />
-          <input type="number" min="0" id="filterPower" placeholder="Power" />
-          <input type="number" min="0" id="filterLife" placeholder="Life/Durability" />
-        </div>
-      </div>
-      <div id="searchResults"></div>
-      <div id="sections"></div>
-      <br>
-      <button id="saveDeck">Save Deck</button>
-    </div>
-    <script src="script.js"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<title>GAS DB</title>
+		<link rel="icon" href="ga-sandbox-favicon.png" type="image/png">
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div id="sidebar">
+			<button id="toggleDark">🌙</button> GA Sandbox DeckBuilder <br> By BeerMoney/Marcherfu <br>
+			<br>
+			<button id="openFolder">Open Deck Folder</button>
+			<input type="file" id="fileInput" name="fileupload" style="display: none" onChange="Handlechange();" multiple />
+			<input type="button" value="Upload deck files" id="fakeBrowse" onclick="HandleBrowseClick();" />
+			<h3>Decks</h3>
+			<button id="newDeck">New Deck</button>
+			<div id="deckList"></div>
+			<br>
+			<button id="downloadIndex">Download deck-index.json</button>
+		</div>
+		<div id="main">
+			<h2 id="deckTitle">No deck selected</h2>
+			<div id="formatSlider" class="segmented">
+				<div class="segmented-track"></div>
+				<button data-format="ANYWHERE" class="active">Any Format</button>
+				<button data-format="STANDARD">Standard</button>
+				<button data-format="PANTHEON">Pantheon</button>
+				<button data-format="DRAFT">Draft</button>
+			</div>
+			<br>
+			<div id="textInputs">
+				<input id="searchInput" placeholder="Search card..." />
+				<input id="filterEffect" placeholder="Search effect..." />
+			</div>
+			<div id="filters">
+				<div class="filter-container">
+					<div class="filter-title">Elements</div>
+					<div class="filter-group" data-type="elements"></div>
+				</div>
+				<div class="filter-container">
+					<div class="filter-title">Classes</div>
+					<div class="filter-group" data-type="classes"></div>
+				</div>
+				<div class="filter-container">
+					<div class="filter-title">Types</div>
+					<div class="filter-group" data-type="types"></div>
+				</div>
+				<div class="filter-container">
+					<div class="filter-title">
+						Subtypes <input type="text" id="subtypeSearch" placeholder="Search subtypes…">
+					</div>
+					<div class="filter-group" id="subtypeChips" data-type="subtypes"></div>
+				</div>
+				<div class="stats-container">
+					<input type="number" min="0" id="filterMemory" placeholder="Memory cost" />
+					<input type="number" min="0" id="filterReserve" placeholder="Reserve cost" />
+					<input type="number" min="0" id="filterPower" placeholder="Power" />
+					<input type="number" min="0" id="filterLife" placeholder="Life/Durability" />
+				</div>
+			</div>
+			<br>
+			<div id="searchResults"></div>
+			<div id="sections"></div>
+			<br>
+			<button id="saveDeck">Save Deck</button>
+		</div>
+		<script src="script.js"></script>
+	</body>
 </html>

@@ -163,7 +163,7 @@ function norm(c) {
 
     return {
         name: c.name || c.cardName,
-        image: (c.editions && c.editions[0]?.image) || "",
+		editions: c.editions || [],
         costType: c.cost?.type || "reserve",
         elements: c.elements || [],
         classes: c.classes || [],
@@ -173,7 +173,8 @@ function norm(c) {
         reserve,
         power: c.power ?? null,
         life: (c.life ?? c.durability) ?? null,
-        legality: c.legality || null
+        legality: c.legality || null,
+		effect_raw: c.effect_raw || []
     };
 }
 
@@ -191,6 +192,7 @@ function matchArrayFilter(values, filter) {
 
 function searchCards() {
     const q = searchInput.value.toLowerCase();
+	const fEffect = normalizeText(filterEffect.value);
     const fElements = [...activeFilters.elements].map(x => x.toLowerCase());
     const fClasses = [...activeFilters.classes].map(x => x.toLowerCase());
     const fTypes = [...activeFilters.types].map(x => x.toLowerCase());
@@ -202,6 +204,7 @@ function searchCards() {
     const res = document.getElementById("searchResults");
     res.innerHTML = "";
     const noFilters = !q &&
+		!fEffect &&
         !fElements.length &&
         !fClasses.length &&
         !fTypes.length &&
@@ -215,8 +218,10 @@ function searchCards() {
         res.innerHTML = "";
         return;
     }
+
     const results = cards.filter(c => {
         if (q && !c.name.toLowerCase().includes(q)) return false;
+		if (fEffect && !(normalizeText(c.effect_raw)).includes(fEffect)) return false;
         if (!matchArrayFilter(c.elements.map(x => x.toLowerCase()), fElements)) return false;
         if (!matchArrayFilter(c.classes.map(x => x.toLowerCase()), fClasses)) return false;
         if (!matchArrayFilter(c.types.map(x => x.toLowerCase()), fTypes)) return false;
@@ -255,52 +260,101 @@ function searchCards() {
         d.addEventListener("mouseleave", () => {
             d.classList.remove("zoom");
         });
-        d.innerHTML = `<img src="http://api.gatcg.com/` + `${card.image}"/>`;
+		const imgPath = card.editions?.[0]?.image || "";
+		d.innerHTML = `<img src="http://api.gatcg.com/` + `${imgPath}"/>`;
         d.onclick = () => addCard(card.name);
         res.appendChild(d);
     });
+}
+
+function getCardImage(cardData, editionName) {
+    if (!cardData?.editions?.length) return "";
+
+    if (!editionName) return cardData.editions[0].image;
+
+    const lower = editionName.toLowerCase();
+
+    const setMatch = cardData.editions.find(e =>
+        e.set?.name?.toLowerCase() === lower
+    );
+
+    if (setMatch) return setMatch.image;
+
+    const partialMatch = cardData.editions.find(e =>
+        lower.includes(e.set?.name?.toLowerCase())
+    );
+
+    if (partialMatch) return partialMatch.image;
+
+    const configMatch = editionName.match(/\((.*?)\)/);
+    if (configMatch) {
+        const config = configMatch[1].toLowerCase();
+
+        const configEdition = cardData.editions.find(e =>
+            (e.configuration || "").toLowerCase() === config
+        );
+
+        if (configEdition) return configEdition.image;
+    }
+
+    return cardData.editions[0].image;
 }
 
 function parseDeckText(t) {
     const r = {
         material: [],
         main: [],
-        sideboard: []
+        sideboard: [],
+		tokenedit: []
     };
+
     let s = null;
+
     t.split("\n").forEach(l => {
         l = l.trim();
         if (!l) return;
+
         if (l.startsWith("#")) {
             if (l.toLowerCase().includes("material")) s = "material";
             else if (l.toLowerCase().includes("main")) s = "main";
             else if (l.toLowerCase().includes("side")) s = "sideboard";
+            else if (l.toLowerCase().includes("token")) s = "tokenedit";
             return;
         }
-        const m = l.match(/(\d+)\s+(.+)/);
-        if (m && s) r[s].push({
-            count: +m[1],
-            name: m[2]
-        });
+
+        // NEW: parse edition
+        const m = l.match(/(\d+)\s+(.+?)(?:\s+\[Edition:\s*(.+?)\])?$/);
+
+        if (m && s) {
+            r[s].push({
+                count: +m[1],
+                name: m[2],
+                edition: m[3] || null
+            });
+        }
     });
+
     return r;
 }
 
 function serializeDeck(p) {
-
-    const clean = (list) => list
-        .filter(c => c && c.name && c.count > 0);
+    const clean = (list) => list.filter(c => c && c.name && c.count > 0);
 
     const f = (title, cards) => {
         const valid = clean(cards);
         if (!valid.length) return "";
-        return `# ${title}\n` + valid.map(c => `${c.count} ${c.name}`).join("\n") + "\n\n";
+
+        return `# ${title}\n` + valid.map(c => {
+            const editionPart = c.edition ? ` [Edition: ${c.edition}]` : "";
+            return `${c.count} ${c.name}${editionPart}`;
+        }).join("\n") + "\n\n";
     };
 
     return (
         f("Material Deck", p.material) +
         f("Main Deck", p.main) +
-        f("Sideboard", p.sideboard)
+        f("Sideboard", p.sideboard) +
+		f("Token Edition", p.tokenedit)
     ).trim();
 }
 
@@ -372,18 +426,21 @@ function createZone(name, list) {
 
     const zone = document.createElement("div");
     zone.className = "zone";
+
     zone.ondragover = e => e.preventDefault();
+
     zone.ondrop = e => {
         e.preventDefault();
 
         const cardName = e.dataTransfer.getData("text/plain");
+        const edition = e.dataTransfer.getData("edition") || null;
         const fromZone = e.dataTransfer.getData("fromZone");
         const toZone = name.toLowerCase();
 
         if (fromZone && fromZone !== toZone) {
-            moveCard(cardName, fromZone, toZone);
+            moveCard(cardName, fromZone, toZone, edition);
         } else {
-            addCard(cardName, toZone);
+            addCard(cardName, toZone, edition);
         }
     };
 
@@ -392,34 +449,43 @@ function createZone(name, list) {
             image: "",
             name: card.name
         };
+
         const tile = document.createElement("div");
         tile.className = "card-tile";
         tile.draggable = true;
+
         tile.ondragstart = (e) => {
             e.dataTransfer.setData("text/plain", card.name);
             e.dataTransfer.setData("fromZone", name.toLowerCase());
+            e.dataTransfer.setData("edition", card.edition || "");
         };
+
         tile.addEventListener("mouseenter", () => {
             if (shiftHeld) tile.classList.add("zoom");
         });
+
         tile.addEventListener("mouseleave", () => {
             tile.classList.remove("zoom");
         });
+
         const img = document.createElement("img");
-        img.src = "http://api.gatcg.com/" + data.image;
-        const nameDiv = document.createElement("div");
+		const imgPath = getCardImage(data, card.edition);
+		img.src = imgPath ? "http://api.gatcg.com/" + imgPath : "";
+
         const count = document.createElement("div");
         count.className = "card-count";
         count.textContent = card.count;
 
         const controls = document.createElement("div");
         controls.className = "card-controls";
+
         const plus = document.createElement("button");
         plus.textContent = "+";
         plus.onclick = () => {
             card.count++;
             renderSections();
         };
+
         const minus = document.createElement("button");
         minus.textContent = "-";
         minus.onclick = () => {
@@ -427,13 +493,14 @@ function createZone(name, list) {
             if (card.count <= 0) list.splice(i, 1);
             renderSections();
         };
+
         controls.appendChild(plus);
         controls.appendChild(minus);
 
         tile.appendChild(img);
-        tile.appendChild(nameDiv);
         tile.appendChild(count);
         tile.appendChild(controls);
+
         zone.appendChild(tile);
     });
 
@@ -449,13 +516,33 @@ function renderSections() {
     c.appendChild(createZone("Sideboard", currentDeck.parsed.sideboard));
 }
 
-function addCard(name, forcedSection = null) {
+function normalizeText(str) {
+    if (!str) return "";
+
+    if (Array.isArray(str)) {
+        str = str.join(" ");
+    }
+
+    if (typeof str === "object") {
+        str = JSON.stringify(str);
+    }
+
+    return String(str)
+        .toLowerCase()
+        .replace(/\n+/g, " ")
+        .replace(/[^\w\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function addCard(name, forcedSection = null, edition = null) {
     if (!currentDeck || !name) return;
 
     const card = cards.find(c => c.name === name);
     let section = forcedSection || (card?.costType === "memory" ? "material" : "main");
 
     const list = currentDeck.parsed[section];
+
     const ex = list.find(c => c.name === name);
 
     if (ex) {
@@ -464,6 +551,7 @@ function addCard(name, forcedSection = null) {
     } else {
         list.push({
             name: String(name),
+            edition,
             count: 1
         });
     }
@@ -471,13 +559,13 @@ function addCard(name, forcedSection = null) {
     renderSections();
 }
 
-function moveCard(name, from, to) {
+function moveCard(name, from, to, edition = null) {
     if (!name || !currentDeck) return;
 
     const fromList = currentDeck.parsed[from];
     const toList = currentDeck.parsed[to];
 
-    const card = fromList.find(c => c.name === name);
+    const card = fromList.find(c => c.name === name && c.edition === edition);
     if (!card) return;
 
     card.count = Number(card.count) || 0;
@@ -488,13 +576,15 @@ function moveCard(name, from, to) {
         if (index !== -1) fromList.splice(index, 1);
     }
 
-    const existing = toList.find(c => c.name === name);
+    const existing = toList.find(c => c.name === name && c.edition === edition);
+
     if (existing) {
         existing.count = Number(existing.count) || 0;
         existing.count++;
     } else {
         toList.push({
             name: String(name),
+            edition,
             count: 1
         });
     }
@@ -521,6 +611,7 @@ async function saveDeckFile() {
 }
 
 searchInput.oninput = searchCards;
+filterEffect.oninput = searchCards;
 filterMemory.oninput = searchCards;
 filterReserve.oninput = searchCards;
 filterPower.oninput = searchCards;
@@ -548,7 +639,8 @@ document.getElementById("newDeck").onclick = () => {
         parsed: {
             material: [],
             main: [],
-            sideboard: []
+            sideboard: [],
+			tokenedit: []
         }
     };
     decks.push(newDeckObj);
